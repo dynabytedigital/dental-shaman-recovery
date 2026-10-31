@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Dental Shaman &bull; Abandoned Checkout Recovery</title>
+  <link rel="icon" type="image/png" href="/logo.png">
+  <link rel="stylesheet" href="styles.css">
+  
+  <script>
+    // Load App Bridge only when running inside Shopify Admin iframe
+    (function() {
+      const params = new URLSearchParams(window.location.search);
+      if (window.top !== window.self || params.has('host') || params.has('shop')) {
+        const meta = document.createElement('meta');
+        meta.name = 'shopify-api-key';
+        meta.content = '65863b05cb87569d1f1fe3cdfe064fdb';
+        document.head.appendChild(meta);
+
+        const script = document.createElement('script');
+        script.src = 'https://cdn.shopify.com/shopifycloud/app-bridge.js';
+        document.head.appendChild(script);
+      }
+    })();
+  </script>
+
+  <style>
+    /* Auth Gate Screen */
+    .auth-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 20%, rgba(116, 75, 111, 0.08) 0%, rgba(248, 249, 250, 0.98) 100%), #f8f9fa;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .auth-card {
+      background: #ffffff;
+      border: 1px solid var(--color-border);
+      border-top: 4px solid var(--color-brand);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 440px;
+      box-shadow: var(--shadow-lg);
+      overflow: hidden;
+    }
+    .auth-header {
+      padding: 24px 28px 20px;
+      border-bottom: 1px solid var(--color-border-subtle);
+      background: var(--color-bg-subtle);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+    }
+    .auth-body {
+      padding: 28px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ========================================================
+       AUTHENTICATION ACCESS GATE
+       ======================================================== -->
+  <div id="authScreen" class="auth-overlay">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="brand-logo-frame" style="width: 46px; height: 46px;">
+          <img src="/logo.png" alt="The Dental Shaman" />
+        </div>
+        <div>
+          <h2 style="font-size: 17px; font-weight: 700; color: var(--color-text-title);">The Dental Shaman</h2>
+          <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">Abandoned Checkout Recovery Engine</p>
+        </div>
+      </div>
+      <div class="auth-body">
+        <form id="loginForm" onsubmit="handleGetIn(event)">
+          <div class="Polaris-FormLayout__Item">
+            <label class="Polaris-Label" for="accessKeyInput">Master Operator Key</label>
+            <input 
+              type="password" 
+              id="accessKeyInput" 
+              class="Polaris-TextField__Input" 
+              placeholder="Enter Master Access Key" 
+              required 
+              autocomplete="current-password" 
+              spellcheck="false" 
+              value=""
+            >
+            <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 6px;">
+              Enter your authorized key to proceed to the management console.
+            </div>
+          </div>
+          <div class="Polaris-FormLayout__Item" style="margin-top: 24px; margin-bottom: 0;">
+            <button type="submit" id="btnGetInSubmit" class="Polaris-Button Polaris-Button--primary" style="width: 100%; padding: 11px 16px; font-size: 14px; font-weight: 600;">
+              Get In
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================
+       MAIN DASHBOARD APPLICATION
+       ======================================================== -->
+  <div id="mainApp" class="Polaris-Page" style="display: none;">
+    
+    <!-- Page Header & Navbar -->
+    <header class="Polaris-Page-Header">
+      <div class="Polaris-Header-TitleBlock">
+        <div class="brand-logo-frame">
+          <img src="/logo.png" alt="The Dental Shaman" />
+        </div>
+        <div class="brand-meta">
+          <h1>Abandoned Checkout Recovery</h1>
+          <div class="brand-store-tag">
+            <span id="headerPulseDot" class="pulse-dot standby"></span>
+            <span id="storeStatusSubtext">Shopify Store: shop.thedentalshaman.com</span>
+          </div>
+        </div>
+      </div>
+      <div class="Polaris-Header-Actions">
+        <span id="automationBadge" class="Polaris-Badge Polaris-Badge--warning">Engine Standby</span>
+        <button id="btnRunScanNow" class="Polaris-Button Polaris-Button--slim" onclick="triggerManualScan()">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <polyline points="1 20 1 14 7 14"></polyline>
+            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+          </svg>
+          Run Scan
+        </button>
+        <button id="btnToggleAutomation" class="Polaris-Button Polaris-Button--primary Polaris-Button--slim" onclick="toggleAutomation()">
+          Enable Automation
+        </button>
+        <span id="userProfileBadge" class="operator-pill">Authorized Operator</span>
+        <button class="Polaris-Button Polaris-Button--slim" onclick="handleLogout()">Sign Out</button>
+      </div>
+    </header>
+
+    <!-- KPI Metrics -->
+    <div class="Polaris-Layout-KPIs">
+      <!-- Card 1: Recoverable Checkouts -->
+      <div class="Polaris-KPI-Card">
+        <div class="kpi-header-row">
+          <div class="Polaris-KPI-Label">Recoverable Checkouts</div>
+          <div class="kpi-icon-pill">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="9" cy="21" r="1"></circle>
+              <circle cx="20" cy="21" r="1"></circle>
+              <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="Polaris-KPI-Value" id="metricUncompletedCount">-</div>
+        <div class="Polaris-KPI-Subtext">
+          <span class="kpi-chip">Awaiting Conversion</span>
+          <span>In active recovery window</span>
+        </div>
+      </div>
+
+      <!-- Card 2: Pipeline Value -->
+      <div class="Polaris-KPI-Card">
+        <div class="kpi-header-row">
+          <div class="Polaris-KPI-Label">Pipeline Value</div>
+          <div class="kpi-icon-pill">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="12" y1="1" x2="12" y2="23"></line>
+              <path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path>
+            </svg>
+          </div>
+        </div>
+        <div class="Polaris-KPI-Value" id="metricRecoverableTotal">£0.00</div>
+        <div class="Polaris-KPI-Subtext">
+          <span class="kpi-chip">Uncaptured Revenue</span>
+          <span>Targeting recovery</span>
+        </div>
+      </div>
+
+      <!-- Card 3: Total Sends -->
+      <div class="Polaris-KPI-Card">
+        <div class="kpi-header-row">
+          <div class="Polaris-KPI-Label">Total Sends</div>
+          <div class="kpi-icon-pill">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
+            </svg>
+          </div>
+        </div>
+        <div class="Polaris-KPI-Value" id="metricTotalCheckouts">0</div>
+        <div class="Polaris-KPI-Subtext">
+          <span class="kpi-chip">Total Dispatches</span>
+          <span>All recovery attempts</span>
+        </div>
+      </div>
+
+      <!-- Card 4: Recovery Emails Sent -->
+      <div class="Polaris-KPI-Card">
+        <div class="kpi-header-row">
+          <div class="Polaris-KPI-Label">Recovery Emails Sent</div>
+          <div class="kpi-icon-pill">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+          </div>
+        </div>
+        <div class="Polaris-KPI-Value" id="metricEmailsSent">0</div>
+        <div class="Polaris-KPI-Subtext">
+          <span class="kpi-chip">Delivered Notices</span>
+          <span>Automated & manual</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="Polaris-Tabs">
+      <button class="Polaris-Tab active" onclick="switchTab('checkouts')">
+        Checkouts
+        <span class="tab-badge" id="tabCheckoutsCount">-</span>
+      </button>
+      <button class="Polaris-Tab" onclick="switchTab('flow')">
+        Cadence Flow
+        <span class="tab-badge">5 Stages</span>
+      </button>
+      <button class="Polaris-Tab" onclick="switchTab('templates')">
+        Templates & Preview
+        <span class="tab-badge">5</span>
+      </button>
+      <button class="Polaris-Tab" onclick="switchTab('logs')">
+        Activity Log
+        <span class="tab-badge" id="tabLogsCount">0</span>
+      </button>
+      <button class="Polaris-Tab" onclick="switchTab('settings')">
+        Settings & Diagnostics
+      </button>
+    </div>
+
+    <!-- ========================================================
+         TAB 1: CHECKOUTS LIST & ACTIONS
+         ======================================================== -->
+    <div id="tab-checkouts" class="Polaris-TabContent active">
+      <div class="Polaris-Card checkouts-card-elevated">
+        <div class="Polaris-Table-Controls">
+          <div class="Polaris-Search-Container">
+            <svg class="Polaris-Search-Icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+              <circle cx="9" cy="9" r="6" stroke-width="2"/>
+              <path d="M13.5 13.5L17 17" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input type="text" id="searchInput" class="Polaris-Search-Input" placeholder="Filter by customer name, email, or product..." oninput="filterCheckouts()">
+          </div>
+          <div class="Polaris-FilterPills">
+            <button class="Polaris-FilterPill active" onclick="setFilter('all', this)">
+              All Abandoned <span class="pill-count" id="pillCountAll">0</span>
+            </button>
+            <button class="Polaris-FilterPill" onclick="setFilter('pending_email', this)">
+              Action Required <span class="pill-count" id="pillCountAction">0</span>
+            </button>
+            <button class="Polaris-FilterPill" onclick="setFilter('sequence_active', this)">
+              Sequence Active <span class="pill-count" id="pillCountSequence">0</span>
+            </button>
+            <button class="Polaris-FilterPill" onclick="setFilter('notice_sent', this)">
+              Notice Sent <span class="pill-count" id="pillCountSent">0</span>
+            </button>
+          </div>
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <button class="Polaris-Button Polaris-Button--slim" onclick="switchTab('flow')" title="Configure sequence timing for all 5 stages">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+              Edit Sequence Timing
+            </button>
+            <button class="Polaris-Button Polaris-Button--slim" onclick="loadCheckouts()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="23 4 23 10 17 10"></polyline>
+                <polyline points="1 20 1 14 7 14"></polyline>
+                <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+              </svg>
+              Refresh
+            </button>
+          </div>
+        </div>
+
+        <div class="table-responsive-wrapper">
+          <table class="Polaris-DataTable checkouts-pro-table">
+            <thead>
+              <tr>
+                <th class="col-customer">Customer Profile</th>
+                <th class="col-items">Cart Contents</th>
+                <th class="col-value">Cart Value</th>
+                <th class="col-stage">Sequence Stage</th>
+                <th class="col-status">Recovery Status</th>
+                <th class="col-action" style="text-align: right;">Customer Sequence &amp; Action</th>
+              </tr>
+            </thead>
+            <tbody id="checkoutsTableBody">
+              <tr>
+                <td colspan="6" style="text-align: center; padding: 36px; color: var(--color-text-muted);">
+                  Synchronizing abandoned checkouts with shop.thedentalshaman.com...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         TAB 2: CADENCE FLOW (5 CLINICAL STAGES & TIMING EDITOR)
+         ======================================================== -->
+    <div id="tab-flow" class="Polaris-TabContent">
+      <div class="Polaris-Card">
+        <div class="Polaris-Card__Header" style="flex-wrap: wrap;">
+          <div>
+            <div class="Polaris-Card__Title">5-Stage Recovery Sequence &amp; Timing Configuration</div>
+            <p style="font-size: 12.5px; color: var(--color-text-muted); margin-top: 3px;">
+              Customize the exact send timing (in hours) for each stage. When you click <strong>Start Sequence</strong> on any customer, Stage 1 dispatches immediately and Stages 2–5 follow your schedule below.
+            </p>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <span class="status-pill sent" id="cadenceActiveCountBadge">5 Stages Configured</span>
+            <button id="btnSaveCadenceTiming" class="Polaris-Button Polaris-Button--primary Polaris-Button--slim" onclick="saveCadenceTimings()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>
+              Save Sequence Timing
+            </button>
+          </div>
+        </div>
+        <div class="Polaris-Card__Section">
+          <div id="cadenceFlowGrid" class="Polaris-FlowGrid">
+            <!-- Dynamically populated by renderCadenceEditor() in app.js -->
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         TAB 3: TEMPLATES & DEVICE PREVIEWS
+         ======================================================== -->
+    <div id="tab-templates" class="Polaris-TabContent">
+      <div class="Polaris-Card">
+        <div class="Polaris-Card__Header">
+          <div>
+            <div class="Polaris-Card__Title">Email Template Live Editor</div>
+            <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">
+              Customize HTML and preview rendering on Desktop & Mobile viewports in real time.
+            </p>
+          </div>
+          <div style="display: flex; gap: 10px; align-items: center;">
+            <select id="templateSelectorDropdown" class="Polaris-TextField__Input" style="width: 280px;" onchange="loadTemplateEditor(this.value)">
+              <option value="1">Stage 1: Cart Saved Check-in (1h)</option>
+              <option value="2">Stage 2: Dr. Marc's Story & Ozone (24h)</option>
+              <option value="3">Stage 3: Social Proof & Reviews (48h)</option>
+              <option value="4">Stage 4: Courtesy Incentive & eBook (72h)</option>
+              <option value="5">Stage 5: Final Expiration Notice (5d)</option>
+            </select>
+            <button class="Polaris-Button Polaris-Button--primary Polaris-Button--slim" onclick="saveCurrentTemplate()">Save Template</button>
+          </div>
+        </div>
+        <div class="Polaris-Card__Section">
+          <div class="Polaris-Grid-2">
+            <!-- Left: HTML & Subject Editor -->
+            <div>
+              <div class="Polaris-FormLayout__Item">
+                <label class="Polaris-Label">Subject Line</label>
+                <input type="text" id="tplSubjectInput" class="Polaris-TextField__Input">
+                <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 4px;">
+                  Variables: <code>{{first_name}}</code>, <code>{{total_price}}</code>, <code>{{shop_name}}</code>
+                </div>
+              </div>
+              <div class="Polaris-FormLayout__Item">
+                <label class="Polaris-Label">HTML Source Code</label>
+                <textarea id="tplHtmlTextarea" class="Polaris-TextField__Input" style="height: 380px; font-family: var(--font-mono); font-size: 12px; line-height: 1.5;"></textarea>
+              </div>
+            </div>
+
+            <!-- Right: Interactive Device Viewport Preview -->
+            <div>
+              <div class="device-preview-bar">
+                <span style="font-weight: 600; color: var(--color-text-title);">Interactive Live Preview</span>
+                <div style="display: flex; gap: 6px;">
+                  <button type="button" id="btnPreviewDesktop" class="device-switcher-btn active" onclick="switchPreviewDevice('desktop')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+                    Desktop
+                  </button>
+                  <button type="button" id="btnPreviewMobile" class="device-switcher-btn" onclick="switchPreviewDevice('mobile')">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2" ry="2"></rect><line x1="12" y1="18" x2="12.01" y2="18"></line></svg>
+                    Mobile
+                  </button>
+                </div>
+              </div>
+              <div class="preview-viewport-wrapper">
+                <div id="previewViewportFrame" class="preview-viewport-frame desktop">
+                  <iframe id="templateLivePreviewIframe" style="width: 100%; height: 100%; border: none;"></iframe>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         TAB 4: ACTIVITY LOG & DISPATCH MANAGEMENT
+         ======================================================== -->
+    <div id="tab-logs" class="Polaris-TabContent">
+      <div class="Polaris-Card">
+        <div class="Polaris-Card__Header">
+          <div>
+            <div class="Polaris-Card__Title">Recovery Email Dispatch Log</div>
+            <p style="font-size: 12px; color: var(--color-text-muted); margin-top: 2px;">
+              Comprehensive audit trail of all automated and manual checkout recovery notices.
+            </p>
+          </div>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="Polaris-Button Polaris-Button--slim" onclick="loadLogs()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              Refresh
+            </button>
+            <button class="Polaris-Button Polaris-Button--slim" onclick="clearAllLogs()" style="color: var(--color-danger-text); border-color: var(--color-danger-border);">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+              Clear All Logs
+            </button>
+          </div>
+        </div>
+
+        <!-- Log Filter & Search Controls -->
+        <div class="Polaris-Table-Controls">
+          <div class="Polaris-Search-Container">
+            <svg class="Polaris-Search-Icon" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+              <circle cx="9" cy="9" r="6" stroke-width="2"/>
+              <path d="M13.5 13.5L17 17" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+            <input type="text" id="logSearchInput" class="Polaris-Search-Input" placeholder="Filter logs by recipient email, subject, or mode..." oninput="filterLogs()">
+          </div>
+          <div class="Polaris-FilterPills">
+            <button class="Polaris-FilterPill active" onclick="setLogFilter('all', this)">All Logs</button>
+            <button class="Polaris-FilterPill" onclick="setLogFilter('sent', this)">Delivered</button>
+            <button class="Polaris-FilterPill" onclick="setLogFilter('failed', this)">Failed</button>
+            <button class="Polaris-FilterPill" onclick="setLogFilter('auto', this)">Automated</button>
+            <button class="Polaris-FilterPill" onclick="setLogFilter('manual', this)">Manual / Test</button>
+          </div>
+        </div>
+
+        <div class="table-responsive-wrapper">
+          <table class="Polaris-DataTable">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Recipient</th>
+                <th>Template / Stage</th>
+                <th>Subject Line</th>
+                <th>Dispatch Mode</th>
+                <th>Status</th>
+                <th style="text-align: right;">Action</th>
+              </tr>
+            </thead>
+            <tbody id="logsTableBody">
+              <tr>
+                <td colspan="7" style="text-align: center; padding: 28px; color: var(--color-text-muted);">
+                  Loading activity logs...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         TAB 5: SETTINGS & LIVE DIAGNOSTIC TEST CENTER (IMAGE 2 FIX)
+         ======================================================== -->
+    <div id="tab-settings" class="Polaris-TabContent">
+      
+      <!-- Top Settings Grid -->
+      <div class="Polaris-Card">
+        <div class="Polaris-Card__Header">
+          <div class="Polaris-Card__Title">Email Integration & Automation Engine</div>
+          <span class="status-pill converted">Active System</span>
+        </div>
+        <div class="Polaris-Card__Section">
+          <div class="Polaris-Grid-2">
+            
+            <!-- Left: Persona & Automation Timing -->
+            <div>
+              <div class="Polaris-FormLayout__Item">
+                <label class="Polaris-Label">Sender Name</label>
+                <input type="text" id="settingFromName" class="Polaris-TextField__Input" placeholder="Dr. Marc Mortiboys | The Dental Shaman">
+              </div>
+              <div class="Polaris-FormLayout__Item">
+                <label class="Polaris-Label">Sender Email Address</label>
+                <input type="email" id="settingFromEmail" class="Polaris-TextField__Input" placeholder="shop@thedentalshaman.com">
+              </div>
+              <div class="Polaris-FormLayout__Item">
+                <label class="Polaris-Label">Reply-To Address</label>
+                <input type="email" id="settingReplyTo" class="Polaris-TextField__Input" placeholder="shop@thedentalshaman.com">
+              </div>
+
+              <div class="Polaris-FormLayout__Item" style="margin-top: 24px;">
+                <label style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+                  <input type="checkbox" id="settingAutoEnabled" style="width: 17px; height: 17px; accent-color: var(--color-brand);">
+                  <span style="font-weight: 600; font-size: 13.5px; color: var(--color-text-title);">Enable Background Automation Engine</span>
+                </label>
+              </div>
+              <div class="Polaris-Grid-2">
+                <div class="Polaris-FormLayout__Item">
+                  <label class="Polaris-Label">Scan Frequency (Minutes)</label>
+                  <input type="number" id="settingScanInterval" class="Polaris-TextField__Input" min="5" value="15">
+                </div>
+                <div class="Polaris-FormLayout__Item">
+                  <label class="Polaris-Label">Customer Cooldown (Hours)</label>
+                  <input type="number" id="settingCooldown" class="Polaris-TextField__Input" min="1" value="18">
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: SMTP Connection Details -->
+            <div>
+              <div class="Polaris-FormLayout__Item">
+                <label class="Polaris-Label">Email Protocol Engine</label>
+                <select id="settingService" class="Polaris-TextField__Input" onchange="toggleServiceFields()">
+                  <option value="smtp">Standard SMTP (Hostinger, Google Workspace, Custom)</option>
+                  <option value="resend">Resend API</option>
+                  <option value="sendgrid">SendGrid API</option>
+                </select>
+              </div>
+
+              <div id="smtpFields">
+                <div class="Polaris-Grid-2">
+                  <div class="Polaris-FormLayout__Item">
+                    <label class="Polaris-Label">SMTP Host</label>
+                    <input type="text" id="settingSmtpHost" class="Polaris-TextField__Input" placeholder="smtp.hostinger.com">
+                  </div>
+                  <div class="Polaris-FormLayout__Item">
+                    <label class="Polaris-Label">SMTP Port</label>
+                    <input type="number" id="settingSmtpPort" class="Polaris-TextField__Input" placeholder="465">
+                  </div>
+                </div>
+                <div class="Polaris-FormLayout__Item">
+                  <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                    <input type="checkbox" id="settingSmtpSecure" checked style="accent-color: var(--color-brand);">
+                    <span style="font-size: 12.5px;">Require SSL/TLS (Recommended for Port 465)</span>
+                  </label>
+                </div>
+                <div class="Polaris-FormLayout__Item">
+                  <label class="Polaris-Label">SMTP Username</label>
+                  <input type="text" id="settingSmtpUser" class="Polaris-TextField__Input" placeholder="shop@thedentalshaman.com">
+                </div>
+                <div class="Polaris-FormLayout__Item">
+                  <label class="Polaris-Label">SMTP Password</label>
+                  <input type="password" id="settingSmtpPass" class="Polaris-TextField__Input" placeholder="Enter password">
+                </div>
+              </div>
+
+              <div id="apiFields" style="display: none;">
+                <div class="Polaris-FormLayout__Item">
+                  <label class="Polaris-Label">API Key</label>
+                  <input type="password" id="settingApiKey" class="Polaris-TextField__Input" placeholder="Enter API Key">
+                </div>
+              </div>
+
+              <div style="margin-top: 18px; text-align: right;">
+                <button class="Polaris-Button Polaris-Button--primary" onclick="saveSettings()">Save Configuration</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Live Diagnostic & Test Email Dispatcher (Comprehensive Image 2 Resolution) -->
+      <div class="diagnostic-panel">
+        <div class="diagnostic-panel__header">
+          <div class="diagnostic-badge-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+            </svg>
+          </div>
+          <div>
+            <div class="diagnostic-panel__title">Live SMTP Delivery & Template Tester</div>
+            <div class="diagnostic-panel__desc">
+              Transmit an authentic test recovery email to any recipient inbox with realistic checkout data to verify SMTP delivery and check how each cadence stage renders in actual email clients.
+            </div>
+          </div>
+        </div>
+
+        <div class="diagnostic-grid">
+          <!-- Recipient Field (Zero Pre-fill!) -->
+          <div>
+            <label class="Polaris-Label" for="testEmailTarget">Recipient Test Email Address</label>
+            <input 
+              type="email" 
+              id="testEmailTarget" 
+              class="Polaris-TextField__Input" 
+              placeholder="Enter test recipient email (e.g. name@example.com)" 
+              value=""
+              autocomplete="email"
+            >
+            <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 5px;">
+              No pre-filled value. Enter any address you want to inspect.
+            </div>
+          </div>
+
+          <!-- Template Selection Dropdown -->
+          <div>
+            <label class="Polaris-Label" for="testTemplateSelect">Select Cadence Stage to Test</label>
+            <select id="testTemplateSelect" class="Polaris-TextField__Input">
+              <option value="1">Stage 1: Cart Saved Check-in (1 Hour)</option>
+              <option value="2">Stage 2: Dr. Marc's Story & Clinical Ozone (24 Hours)</option>
+              <option value="3">Stage 3: Social Proof & Gum Health (48 Hours)</option>
+              <option value="4">Stage 4: Courtesy Incentive & eBook (72 Hours)</option>
+              <option value="5">Stage 5: Final Notice & Cart Expiration (5 Days)</option>
+            </select>
+            <div style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 5px;">
+              The exact template selected will be rendered and transmitted via your SMTP server.
+            </div>
+          </div>
+        </div>
+
+        <!-- Action Row -->
+        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+          <button id="btnSendTestEmail" class="Polaris-Button Polaris-Button--primary" onclick="sendTestEmail()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <line x1="22" y1="2" x2="11" y2="13"></line>
+              <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+            </svg>
+            Send Test Recovery Email
+          </button>
+          <button class="Polaris-Button" onclick="previewSelectedTestTemplate()">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+              <circle cx="12" cy="12" r="3"></circle>
+            </svg>
+            Preview Template First
+          </button>
+        </div>
+
+        <!-- Diagnostic Feedback Box -->
+        <div id="testResultAlert" class="diagnostic-result-box"></div>
+      </div>
+    </div>
+
+    <!-- ========================================================
+         MODAL: REVIEW & SEND ABANDONED CHECKOUT
+         ======================================================== -->
+    <div id="reviewModal" class="Polaris-Modal-Overlay">
+      <div class="Polaris-Modal">
+        <div class="Polaris-Modal__Header">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="Polaris-Modal__Title">Review &amp; Send Recovery Notice</div>
+            <span id="modalCustomerStatusBadge" class="status-pill pending"><span class="dot"></span> Action Required</span>
+          </div>
+          <button class="Polaris-Modal__Close" onclick="closeModal()">&times;</button>
+        </div>
+        <div class="Polaris-Modal__Body">
+          <!-- Rich Structured Customer & Cart Summary Card -->
+          <div class="modal-summary-card">
+            <div class="modal-summary-header">
+              <div class="modal-customer-profile">
+                <div id="modalCustomerInitials" class="avatar-initials modal-avatar">DS</div>
+                <div class="modal-customer-info">
+                  <div class="modal-customer-name-row">
+                    <span id="modalCustomerName" class="modal-customer-name">-</span>
+                    <span id="modalCustomerCountry" class="country-pill" style="display: none;"></span>
+                  </div>
+                  <div class="modal-customer-contact-row">
+                    <span id="modalCustomerEmail" class="modal-contact-pill">-</span>
+                    <span id="modalCustomerPhone" class="modal-contact-pill" style="display: none;"></span>
+                  </div>
+                </div>
+              </div>
+              <div class="modal-value-panel">
+                <div class="modal-value-label">Abandoned Cart Value</div>
+                <div id="modalCartTotal" class="modal-value-amount">£0.00</div>
+                <div id="modalCartAge" class="modal-value-meta">-</div>
+              </div>
+            </div>
+            <div class="modal-cart-divider"></div>
+            <div class="modal-cart-items-section">
+              <div class="modal-cart-section-header">
+                <span class="modal-cart-section-title">Reserved Cart Contents</span>
+                <span id="modalCartItemsCountBadge" class="modal-items-count-pill">0 items</span>
+              </div>
+              <div id="modalCartSummary" class="modal-cart-items-grid"></div>
+            </div>
+          </div>
+
+          <!-- Controls: Stage Selector & Subject -->
+          <div class="Polaris-Grid-2" style="margin-bottom: 16px;">
+            <div>
+              <label class="Polaris-Label">Recovery Stage</label>
+              <select id="modalTemplateSelect" class="Polaris-TextField__Input" onchange="updateModalPreview()">
+                <option value="1">Stage 1: Cart Saved Check-in (1 Hour)</option>
+                <option value="2">Stage 2: Dr. Marc's Story &amp; Clinical Ozone (24 Hours)</option>
+                <option value="3">Stage 3: Social Proof &amp; Gum Health (48 Hours)</option>
+                <option value="4">Stage 4: Courtesy Incentive &amp; eBook (72 Hours)</option>
+                <option value="5">Stage 5: Final Notice &amp; Cart Expiration (5 Days)</option>
+              </select>
+            </div>
+            <div>
+              <label class="Polaris-Label">Subject Line (Editable)</label>
+              <input type="text" id="modalSubjectInput" class="Polaris-TextField__Input" oninput="updateModalPreviewSubject()">
+            </div>
+          </div>
+
+          <!-- Live Iframe Preview -->
+          <div style="border: 1px solid var(--color-border); border-radius: var(--radius-md); height: 360px; overflow: hidden; background: #ffffff;">
+            <iframe id="modalPreviewIframe" style="width: 100%; height: 100%; border: none;"></iframe>
+          </div>
+        </div>
+
+        <div class="Polaris-Modal__Footer">
+          <button class="Polaris-Button" onclick="closeModal()">Cancel</button>
+          <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+            <button id="btnStartSeqFromModal" class="Polaris-Button" onclick="startSequenceFromModal()" style="border-color: var(--color-brand-border); color: var(--color-brand); background: var(--color-brand-light);">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="6 4 20 12 6 20 6 4"></polygon></svg>
+              Start Full 5-Stage Sequence
+            </button>
+            <button id="btnSendModalEmail" class="Polaris-Button Polaris-Button--primary" onclick="sendModalEmail()">
+              Send This Stage Only
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal: Modify / Inspect Log Detail -->
+    <div id="logDetailModal" class="Polaris-Modal-Overlay">
+      <div class="Polaris-Modal" style="max-width: 600px;">
+        <div class="Polaris-Modal__Header">
+          <div>
+            <div class="Polaris-Modal__Title">Modify / Inspect Dispatch Record</div>
+            <div id="logDetailMetaSubtext" style="font-size: 11.5px; color: var(--color-text-muted); margin-top: 2px;"></div>
+          </div>
+          <button class="Polaris-Modal__Close" onclick="closeLogModal()">&times;</button>
+        </div>
+        <div class="Polaris-Modal__Body">
+          <input type="hidden" id="editLogId">
+          
+          <div class="Polaris-Grid-2">
+            <div class="Polaris-FormLayout__Item">
+              <label class="Polaris-Label">Recipient Email</label>
+              <input type="email" id="editLogRecipient" class="Polaris-TextField__Input">
+            </div>
+            <div class="Polaris-FormLayout__Item">
+              <label class="Polaris-Label">Customer Name</label>
+              <input type="text" id="editLogCustomer" class="Polaris-TextField__Input">
+            </div>
+          </div>
+
+          <div class="Polaris-FormLayout__Item">
+            <label class="Polaris-Label">Subject Line</label>
+            <input type="text" id="editLogSubject" class="Polaris-TextField__Input">
+          </div>
+
+          <div class="Polaris-Grid-2">
+            <div class="Polaris-FormLayout__Item">
+              <label class="Polaris-Label">Template / Cadence Stage</label>
+              <select id="editLogTemplate" class="Polaris-TextField__Input">
+                <option value="1">Stage 1: Cart Saved Check-in (1h)</option>
+                <option value="2">Stage 2: Dr. Marc's Story & Clinical Ozone (24h)</option>
+                <option value="3">Stage 3: Social Proof & Gum Health (48h)</option>
+                <option value="4">Stage 4: Courtesy Incentive & eBook (72h)</option>
+                <option value="5">Stage 5: Final Notice & Cart Expiration (5d)</option>
+              </select>
+            </div>
+            <div class="Polaris-FormLayout__Item">
+              <label class="Polaris-Label">Dispatch Status</label>
+              <select id="editLogStatus" class="Polaris-TextField__Input">
+                <option value="sent">Delivered (Sent)</option>
+                <option value="failed">Failed Delivery</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="Polaris-FormLayout__Item" style="margin-bottom: 0;">
+            <label class="Polaris-Label">SMTP Message ID / Signature</label>
+            <div id="editLogMessageId" style="font-family: var(--font-mono); font-size: 11.5px; background: var(--color-bg-muted); padding: 8px 12px; border-radius: var(--radius-sm); color: var(--color-text-muted); word-break: break-all;">-</div>
+          </div>
+        </div>
+
+        <div class="Polaris-Modal__Footer">
+          <button class="Polaris-Button Polaris-Button--slim" onclick="deleteCurrentLogFromModal()" style="color: var(--color-danger-text); border-color: var(--color-danger-border);">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            Delete Log
+          </button>
+          <div style="display: flex; gap: 8px;">
+            <button class="Polaris-Button Polaris-Button--slim" onclick="resendCurrentLogFromModal()">
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+              Resend Email
+            </button>
+            <button class="Polaris-Button Polaris-Button--primary Polaris-Button--slim" onclick="saveLogModifications()">
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="Polaris-Toast"></div>
+
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

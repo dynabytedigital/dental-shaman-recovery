@@ -1,0 +1,28 @@
+{
+  "name": "dental-shaman-abandoned-cart-app",
+  "version": "1.0.0",
+  "description": "Automated & Manual Abandoned Checkout Recovery App for The Dental Shaman",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "test-connection": "node -e \"require('./shopifyClient').testConnection().then(r => console.log(r))\""
+  },
+  "keywords": [
+    "shopify",
+    "abandoned-cart",
+    "dental-shaman",
+    "automation",
+    "email-marketing"
+  ],
+  "author": "Antigravity",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.7.9",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.7",
+    "express": "^4.21.2",
+    "node-cron": "^3.0.3",
+    "nodemailer": "^6.9.16"
+  }
+}

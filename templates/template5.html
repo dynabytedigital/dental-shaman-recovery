@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Final reminder regarding your cart - The Dental Shaman</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #f6f6f7;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      color: #202223;
+      -webkit-font-smoothing: antialiased;
+    }
+    .email-wrapper {
+      width: 100%;
+      background-color: #f6f6f7;
+      padding: 40px 16px;
+    }
+    .email-container {
+      max-width: 580px;
+      margin: 0 auto;
+      background-color: #ffffff;
+      border-radius: 8px;
+      border: 1px solid #e1e3e5;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+    .header-logo {
+      text-align: center;
+      padding: 36px 24px 20px;
+    }
+    .header-logo img {
+      max-height: 65px;
+      width: auto;
+      display: inline-block;
+    }
+    .content-body {
+      padding: 0 36px 36px;
+    }
+    .headline {
+      font-size: 20px;
+      font-weight: 700;
+      color: #111827;
+      margin: 0 0 14px;
+      letter-spacing: -0.3px;
+    }
+    .subtext {
+      font-size: 15px;
+      line-height: 1.65;
+      color: #374151;
+      margin: 0 0 20px;
+    }
+    .notice-card {
+      background: #fafbfc;
+      border-left: 3px solid #202223;
+      padding: 16px 20px;
+      margin: 20px 0;
+      font-size: 14px;
+      color: #374151;
+      line-height: 1.6;
+    }
+    .cta-block {
+      text-align: left;
+      margin: 28px 0;
+    }
+    .shopify-btn {
+      display: inline-block;
+      background-color: #744B6F;
+      color: #ffffff !important;
+      text-decoration: none;
+      padding: 14px 32px;
+      border-radius: 6px;
+      font-size: 15px;
+      font-weight: 600;
+      letter-spacing: 0.2px;
+    }
+    .cart-section-title {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #6d7175;
+      padding-bottom: 8px;
+      border-bottom: 1px solid #e5e7eb;
+      margin-top: 32px;
+      margin-bottom: 12px;
+    }
+    .email-footer {
+      background-color: #fafbfc;
+      border-top: 1px solid #e1e3e5;
+      padding: 24px 36px;
+      text-align: center;
+      font-size: 12px;
+      color: #8c9196;
+      line-height: 1.6;
+    }
+    .email-footer a {
+      color: #6d7175;
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+  <div class="email-wrapper">
+    <div class="email-container">
+      
+      <!-- Brand Logo Header -->
+      <div class="header-logo">
+        <a href="https://shop.thedentalshaman.com" target="_blank">
+          <img src="https://cdn.shopify.com/s/files/1/0946/8238/2665/files/THE_DENTAL_SHAMAN_LOGO.png?v=1746492717" alt="The Dental Shaman" />
+        </a>
+      </div>
+
+      <!-- Main Content -->
+      <div class="content-body">
+        <h1 class="headline">Final notice regarding your reserved cart</h1>
+        
+        <p class="subtext">
+          Hi {{first_name}}, this is our final courtesy update regarding your pending order at The Dental Shaman.
+        </p>
+
+        <div class="notice-card">
+          Due to high patient demand for our clinical Ozone Flossers, uncompleted checkout reservations can only be held for a limited duration. In 24 hours, your reserved units will be returned to general inventory.
+        </div>
+
+        <div class="cta-block">
+          <a href="{{checkout_url}}" class="shopify-btn" target="_blank">Complete your order before release</a>
+        </div>
+
+        <div class="cart-section-title">Items scheduled for release</div>
+        {{cart_items_html}}
+
+        <p class="subtext" style="font-size: 13px; color: #6d7175; margin-top: 24px;">
+          If you have decided not to proceed, no further notices will be dispatched.
+        </p>
+      </div>
+
+      <!-- Official Shopify Footer -->
+      <div class="email-footer">
+        <p style="margin: 0 0 6px;">The Dental Shaman &bull; 11 Long Reach, West Horsley, Surrey, KT24 6LZ, United Kingdom</p>
+        <p style="margin: 0;"><a href="https://shop.thedentalshaman.com">Visit our website</a></p>
+      </div>
+
+    </div>
+  </div>
+</body>
+</html>

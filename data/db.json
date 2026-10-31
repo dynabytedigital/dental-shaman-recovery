@@ -1,0 +1,166 @@
+{
+  "masterAccessCode": "SHAMAN-PRO-9842",
+  "users": [
+    {
+      "id": "usr_master_admin",
+      "email": "admin@thedentalshaman.com",
+      "name": "Authorized Operator",
+      "createdAt": "2026-10-29T11:27:16.066Z"
+    }
+  ],
+  "sessions": {
+    "tok_cc3600d49dcf6ea0d056abb208813b40b2ccf06d28c892671b899f617fa76a9a": {
+      "userId": "usr_master_admin",
+      "user": {
+        "id": "usr_master_admin",
+        "email": "admin@thedentalshaman.com",
+        "name": "Authorized Operator"
+      },
+      "createdAt": "2026-10-29T11:28:45.993Z"
+    },
+    "tok_555bd6a4ca5d82bc932cbba11a39bc5b3bbaac7f2222c4084c91430bb33965bb": {
+      "userId": "usr_master_admin",
+      "user": {
+        "id": "usr_master_admin",
+        "email": "admin@thedentalshaman.com",
+        "name": "Authorized Operator"
+      },
+      "createdAt": "2026-10-29T11:38:36.664Z"
+    },
+    "tok_87b6fadbcd66f25581332f5ec2d6ea54f2c95d92b403fb2028bbe1c47f4d03b6": {
+      "userId": "usr_master_admin",
+      "user": {
+        "id": "usr_master_admin",
+        "email": "admin@thedentalshaman.com",
+        "name": "Authorized Operator"
+      },
+      "createdAt": "2026-10-29T12:15:07.980Z"
+    },
+    "tok_f793150df7157a1b808d0bc632bd6f1235451ddecf22df4b59d1765c0f8890b9": {
+      "userId": "usr_master_admin",
+      "user": {
+        "id": "usr_master_admin",
+        "email": "admin@thedentalshaman.com",
+        "name": "Authorized Operator"
+      },
+      "createdAt": "2026-10-29T12:22:34.618Z"
+    },
+    "tok_3c273117305ea2818b988cbf2034e4bf6f86be2525d55fb4dd568e33e8f7af7f": {
+      "userId": "usr_master_admin",
+      "user": {
+        "id": "usr_master_admin",
+        "email": "admin@thedentalshaman.com",
+        "name": "Authorized Operator"
+      },
+      "createdAt": "2026-10-29T12:28:45.763Z"
+    },
+    "tok_0d983f0e567fc11cca74effbe428a41fedc648f24c6bcac506d2f2f4690843e4": {
+      "userId": "usr_master_admin",
+      "user": {
+        "id": "usr_master_admin",
+        "email": "admin@thedentalshaman.com",
+        "name": "Authorized Operator"
+      },
+      "createdAt": "2026-10-29T12:32:46.248Z"
+    },
+    "tok_70ad621b0b73323ec9640477a7c299a3ac587f6d85e07498a57fa9b17fa66d56": {
+      "userId": "usr_master_admin",
+      "user": {
+        "id": "usr_master_admin",
+        "email": "admin@thedentalshaman.com",
+        "name": "Authorized Operator"
+      },
+      "createdAt": "2026-10-31T07:11:06.901Z"
+    },
+    "tok_a8d0f768fa2ad9bc7bb6073bbbc72d12bf96d39a60567a76571d125230a9d2ea": {
+      "userId": "usr_master_admin",
+      "user": {
+        "id": "usr_master_admin",
+        "email": "admin@thedentalshaman.com",
+        "name": "Authorized Operator"
+      },
+      "createdAt": "2026-10-31T09:52:30.929Z"
+    }
+  },
+  "settings": {
+    "automationEnabled": false,
+    "scanIntervalMinutes": 15,
+    "minCooldownHours": 18,
+    "senderName": "Dr. Marc Mortiboys | The Dental Shaman",
+    "senderEmail": "shop@thedentalshaman.com",
+    "replyTo": "shop@thedentalshaman.com",
+    "emailService": "smtp",
+    "smtp": {
+      "host": "smtp.hostinger.com",
+      "port": 465,
+      "secure": true,
+      "user": "shop@thedentalshaman.com",
+      "pass": "mh1i-liei-n0u1-qa37"
+    },
+    "apiKey": "",
+    "templatesConfig": [
+      {
+        "id": 1,
+        "name": "Stage 1: Cart Saved Check-in",
+        "minAgeHours": 1,
+        "maxAgeHours": 23,
+        "enabled": true,
+        "subject": "Did something go wrong with your order, {{first_name}}?",
+        "file": "template1.html"
+      },
+      {
+        "id": 2,
+        "name": "Stage 2: Dr. Marc's Story & Clinical Ozone",
+        "minAgeHours": 24,
+        "maxAgeHours": 47,
+        "enabled": true,
+        "subject": "A note from Dr. Marc Mortiboys (BDS): The truth about flossing & ozone care",
+        "file": "template2.html"
+      },
+      {
+        "id": 3,
+        "name": "Stage 3: Social Proof & Gum Health",
+        "minAgeHours": 48,
+        "maxAgeHours": 71,
+        "enabled": true,
+        "subject": "Real smiles, real relief: What happens when you switch to The Dental Shaman",
+        "file": "template3.html"
+      },
+      {
+        "id": 4,
+        "name": "Stage 4: Courtesy Incentive & eBook",
+        "minAgeHours": 72,
+        "maxAgeHours": 119,
+        "enabled": true,
+        "subject": "A courtesy benefit has been extended to your order",
+        "file": "template4.html"
+      },
+      {
+        "id": 5,
+        "name": "Stage 5: Final Notice & Cart Expiration",
+        "minAgeHours": 120,
+        "maxAgeHours": 336,
+        "enabled": true,
+        "subject": "Final Notice: We are releasing your reserved cart soon",
+        "file": "template5.html"
+      }
+    ]
+  },
+  "emailLogs": [
+    {
+      "id": "log_1793443559106_jhiyf",
+      "sentAt": "2026-10-31T10:45:59.106Z",
+      "checkoutId": "test_checkout_1793443557507",
+      "customerEmail": "nasratulnayem01@gmail.com",
+      "customerName": "Test Recipient",
+      "templateId": 1,
+      "templateName": "Stage 1: Cart Saved Check-in",
+      "subject": "[Test Stage 1] Did something go wrong with your order, Dr. Marc?",
+      "status": "sent",
+      "mode": "manual",
+      "messageId": "<986514a0-bd55-5850-14af-09d2f0bfc63e@thedentalshaman.com>"
+    }
+  ],
+  "customerSequences": {},
+  "suppressions": []
+}

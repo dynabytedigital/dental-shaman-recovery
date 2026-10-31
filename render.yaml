@@ -1,0 +1,32 @@
+services:
+  - type: web
+    name: dental-shaman-recovery-engine
+    env: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: SHOPIFY_SHOP
+        value: shop.thedentalshaman.com
+      - key: SHOPIFY_MYSHOPIFY_DOMAIN
+        value: myjrue-ku.myshopify.com
+      - key: DEFAULT_FROM_NAME
+        value: Dr. Marc Mortiboys | The Dental Shaman
+      - key: DEFAULT_FROM_EMAIL
+        value: shop@thedentalshaman.com
+      - key: DEFAULT_REPLY_TO
+        value: shop@thedentalshaman.com
+      - key: SMTP_HOST
+        value: smtp.hostinger.com
+      - key: SMTP_PORT
+        value: "465"
+      - key: SMTP_SECURE
+        value: "true"
+      - key: SMTP_USER
+        value: shop@thedentalshaman.com
+      - key: SMTP_PASS
+        value: mh1i-liei-n0u1-qa37
+      - key: MASTER_ACCESS_CODE
+        value: SHAMAN-PRO-9842
