@@ -3,26 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="shopify-api-key" content="65863b05cb87569d1f1fe3cdfe064fdb" />
   <title>The Dental Shaman &bull; Abandoned Checkout Recovery</title>
   <link rel="icon" type="image/png" href="/logo.png">
   <link rel="stylesheet" href="styles.css">
-  
-  <script>
-    // Load App Bridge only when running inside Shopify Admin iframe
-    (function() {
-      const params = new URLSearchParams(window.location.search);
-      if (window.top !== window.self || params.has('host') || params.has('shop')) {
-        const meta = document.createElement('meta');
-        meta.name = 'shopify-api-key';
-        meta.content = '65863b05cb87569d1f1fe3cdfe064fdb';
-        document.head.appendChild(meta);
-
-        const script = document.createElement('script');
-        script.src = 'https://cdn.shopify.com/shopifycloud/app-bridge.js';
-        document.head.appendChild(script);
-      }
-    })();
-  </script>
+  <script src="https://cdn.shopify.com/shopifycloud/app-bridge.js"></script>
 
   <style>
     /* Auth Gate Screen */

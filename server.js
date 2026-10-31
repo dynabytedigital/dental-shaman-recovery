@@ -69,6 +69,15 @@ app.get('/health', (req, res) => {
   });
 });
 
+// Shopify OAuth / Install Callback Handlers (Redirects cleanly to the embedded dashboard)
+const handleShopifyAuthCallback = (req, res) => {
+  const query = new URLSearchParams(req.query).toString();
+  res.redirect('/' + (query ? `?${query}` : ''));
+};
+app.get('/auth/callback', handleShopifyAuthCallback);
+app.get('/api/auth/callback', handleShopifyAuthCallback);
+app.get('/auth', handleShopifyAuthCallback);
+
 // Serve static frontend
 app.use(express.static(path.join(__dirname, 'public')));
 

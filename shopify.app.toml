@@ -3,7 +3,7 @@
 client_id = "65863b05cb87569d1f1fe3cdfe064fdb"
 name = "The Dental Shaman Abandoned Checkout Flow"
 handle = "dental-shaman-abandoned-checkout"
-application_url = "https://new-pugs-own.loca.lt"
+application_url = "https://dental-shaman-recovery-engine.onrender.com"
 embedded = true
 
 [build]
@@ -15,8 +15,8 @@ scopes = "write_checkouts,read_checkouts,write_orders,read_orders,write_customer
 
 [auth]
 redirect_urls = [
-  "https://new-pugs-own.loca.lt/auth/callback",
-  "https://new-pugs-own.loca.lt/api/auth/callback"
+  "https://dental-shaman-recovery-engine.onrender.com/auth/callback",
+  "https://dental-shaman-recovery-engine.onrender.com/api/auth/callback"
 ]
 
 [webhooks]
