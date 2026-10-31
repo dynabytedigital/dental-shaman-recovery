@@ -1,6 +1,6 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
-client_id = "65863b05cb87569d1f1fe3cdfe064fdb"
+client_id = "dbdab26b574956c5bcee43ff417899d8"
 name = "Abandon Checkout EA"
 handle = "abandon-checkout-ea"
 application_url = "https://dental-shaman-recovery-engine.onrender.com"

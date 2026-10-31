@@ -81,9 +81,9 @@ app.get('/auth', handleShopifyAuthCallback);
 // Serve index.html with dynamic SHOPIFY_CLIENT_ID injection so any new Shopify App slot works immediately
 const serveIndexHtml = (req, res) => {
   try {
-    const clientId = process.env.SHOPIFY_CLIENT_ID || '65863b05cb87569d1f1fe3cdfe064fdb';
+    const clientId = process.env.SHOPIFY_CLIENT_ID || 'dbdab26b574956c5bcee43ff417899d8';
     let html = fs.readFileSync(path.join(__dirname, 'public', 'index.html'), 'utf-8');
-    html = html.replace(/content="65863b05cb87569d1f1fe3cdfe064fdb"/g, `content="${clientId}"`);
+    html = html.replace(/content="(65863b05cb87569d1f1fe3cdfe064fdb|dbdab26b574956c5bcee43ff417899d8)"/g, `content="${clientId}"`);
     res.setHeader('Content-Type', 'text/html; charset=utf-8');
     res.send(html);
   } catch (err) {
