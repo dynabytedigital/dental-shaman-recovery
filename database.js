@@ -4,7 +4,7 @@ const crypto = require('crypto');
 
 const DB_PATH = path.join(__dirname, 'data', 'db.json');
 
-const MASTER_ACCESS_CODE = process.env.MASTER_ACCESS_CODE || 'SHAMAN-PRO-9842';
+const MASTER_ACCESS_CODE = process.env.MASTER_ACCESS_CODE || 'TDS-REC#FBC72E3C-E5D99DF0-04F10156';
 
 const DEFAULT_DB = {
   masterAccessCode: MASTER_ACCESS_CODE,
@@ -132,22 +132,17 @@ class Database {
   verifyMasterAccessCode(code) {
     if (!code) return false;
     const raw = String(code).trim();
-    const clean = raw.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    const targetCode = process.env.MASTER_ACCESS_CODE || 'TDS-REC#FBC72E3C-E5D99DF0-04F10156';
 
-    // Check exact base64 strings
-    if (raw === 'U0hBTUFOLVBSTy05ODQyCgogIA==' || raw === 'U0hBTUFOLVBSTy05ODQy') return true;
-
-    // Check decoded base64
     try {
-      const decoded = Buffer.from(raw, 'base64').toString('utf-8').trim();
-      if (decoded.replace(/[^a-zA-Z0-9]/g, '').toUpperCase() === 'SHAMANPRO9842') return true;
+      const hashA = crypto.createHash('sha256').update(raw).digest();
+      const hashB = crypto.createHash('sha256').update(targetCode).digest();
+      if (crypto.timingSafeEqual(hashA, hashB)) return true;
     } catch (e) {}
 
-    // Check plain text (case insensitive, dash insensitive)
-    if (clean === 'SHAMANPRO9842') return true;
-
-    // Allow the Hostinger password if entered by user
-    if (clean === 'MH1ILIEIN0U1QA37') return true;
+    const clean = raw.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    const targetClean = targetCode.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    if (clean === targetClean) return true;
 
     return false;
   }
