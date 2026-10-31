@@ -1,8 +1,8 @@
 # Learn more about configuring your app at https://shopify.dev/docs/apps/tools/cli/configuration
 
 client_id = "65863b05cb87569d1f1fe3cdfe064fdb"
-name = "The Dental Shaman Abandoned Checkout Flow"
-handle = "dental-shaman-abandoned-checkout"
+name = "CLI Bridge"
+handle = "cli-bridge-1"
 application_url = "https://dental-shaman-recovery-engine.onrender.com"
 embedded = true
 
