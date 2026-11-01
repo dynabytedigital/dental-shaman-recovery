@@ -528,6 +528,63 @@ app.post('/api/logs/:id/resend', async (req, res) => {
   }
 });
 
+// Retry all failed logs with 1 click
+app.post('/api/logs/retry-all-failed', async (req, res) => {
+  try {
+    const logs = db.getLogs();
+    const failedLogs = logs.filter(l => l.status === 'failed');
+    if (failedLogs.length === 0) {
+      return res.json({ success: true, count: 0, message: 'No failed email logs to retry.' });
+    }
+
+    let retriedCount = 0;
+    let failedAgainCount = 0;
+
+    for (const log of failedLogs) {
+      try {
+        const targetEmail = log.customerEmail;
+        const templateId = log.templateId || 1;
+        let checkout = null;
+        if (log.checkoutId && !log.checkoutId.startsWith('test_')) {
+          checkout = await shopifyClient.getCheckoutById(log.checkoutId);
+        }
+
+        if (checkout) {
+          const rendered = emailService.renderTemplate(templateId, checkout, log.subject);
+          await emailService.sendEmail({
+            to: targetEmail,
+            subject: rendered.subject,
+            html: rendered.html,
+            checkoutId: checkout.id,
+            templateId,
+            mode: 'batch-retry',
+            customerName: checkout.fullName
+          });
+        } else {
+          await emailService.sendTestEmail(targetEmail, templateId);
+        }
+
+        db.updateLog(log.id, { status: 'retried', resolvedAt: new Date().toISOString() });
+        retriedCount++;
+      } catch (err) {
+        failedAgainCount++;
+        console.error(`[Retry All Failed] Could not retry log ${log.id} for ${log.customerEmail}:`, err.message);
+      }
+      await new Promise(r => setTimeout(r, 400));
+    }
+
+    res.json({
+      success: true,
+      totalFailed: failedLogs.length,
+      retriedCount,
+      failedAgainCount,
+      message: `Retried ${retriedCount} of ${failedLogs.length} failed dispatches.`
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // 11. Templates API
 app.get('/api/templates/:id', (req, res) => {
   try {

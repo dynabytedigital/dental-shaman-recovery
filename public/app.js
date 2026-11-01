@@ -1071,6 +1071,41 @@ async function resendCurrentLogFromModal() {
   await resendLogEntry(logId);
 }
 
+async function retryAllFailedLogs() {
+  const failedList = currentLogs.filter(l => l.status === 'failed');
+  if (failedList.length === 0) {
+    showToast('No failed email dispatches found to retry.');
+    return;
+  }
+
+  const btn = document.getElementById('btnRetryAllFailedLogs');
+  if (btn) {
+    btn.disabled = true;
+    btn.innerHTML = `<span class="spinner" style="display:inline-block; width:12px; height:12px; border:2px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin 1s linear infinite; margin-right:6px;"></span> Retrying ${failedList.length} failed...`;
+  }
+
+  showToast(`Initiating 1-click retry for ${failedList.length} failed dispatches...`);
+
+  try {
+    const res = await authFetch('/api/logs/retry-all-failed', { method: 'POST' });
+    const data = await res.json();
+    if (data.success) {
+      showToast(data.message || 'Retry complete.');
+      await loadLogs();
+      await loadStatus();
+    } else {
+      showToast(`Retry failed: ${data.error}`, true);
+    }
+  } catch (e) {
+    showToast(`Error: ${e.message}`, true);
+  } finally {
+    if (btn) {
+      btn.disabled = false;
+      btn.innerHTML = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg> Retry Failed Emails`;
+    }
+  }
+}
+
 /* ========================================================
    SETTINGS & LIVE DIAGNOSTIC DISPATCHER (IMAGE 2 UPGRADE)
    ======================================================== */

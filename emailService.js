@@ -13,32 +13,26 @@ class EmailService {
     const settings = db.getSettings();
     const smtp = settings.smtp || {};
 
-    if (!smtp.user || !smtp.pass) {
-      // If user hasn't set custom SMTP credentials, check environment
-      if (process.env.SMTP_USER && process.env.SMTP_PASS) {
-        return nodemailer.createTransport({
-          host: process.env.SMTP_HOST || 'smtp.gmail.com',
-          port: parseInt(process.env.SMTP_PORT || '587', 10),
-          secure: process.env.SMTP_SECURE === 'true',
-          auth: {
-            user: process.env.SMTP_USER,
-            pass: process.env.SMTP_PASS
-          }
-        });
-      }
-    }
+    const host = smtp.host || process.env.SMTP_HOST || 'smtp.hostinger.com';
+    const port = parseInt(smtp.port || process.env.SMTP_PORT || '465', 10);
+    const secure = (smtp.secure !== undefined) ? Boolean(smtp.secure) : (port === 465 || process.env.SMTP_SECURE === 'true');
+    const user = smtp.user || process.env.SMTP_USER || 'shop@thedentalshaman.com';
+    const pass = smtp.pass || process.env.SMTP_PASS;
 
     return nodemailer.createTransport({
-      host: smtp.host || 'smtp.gmail.com',
-      port: parseInt(smtp.port || 587, 10),
-      secure: Boolean(smtp.secure),
+      host,
+      port,
+      secure,
       auth: {
-        user: smtp.user,
-        pass: smtp.pass
+        user,
+        pass
       },
       tls: {
         rejectUnauthorized: false
-      }
+      },
+      connectionTimeout: 6000,
+      greetingTimeout: 6000,
+      socketTimeout: 8000
     });
   }
 
@@ -185,7 +179,9 @@ class EmailService {
     try {
       let messageId = null;
 
-      if (settings.emailService === 'resend') {
+      const resendApiKey = settings.apiKey || process.env.RESEND_API_KEY;
+      if (settings.emailService === 'resend' || (!settings.emailService && resendApiKey)) {
+        if (!resendApiKey) throw new Error('Resend API Key is required. Please add it in Settings.');
         const res = await axios.post(
           'https://api.resend.com/emails',
           {
@@ -197,13 +193,16 @@ class EmailService {
           },
           {
             headers: {
-              Authorization: `Bearer ${settings.apiKey}`,
+              Authorization: `Bearer ${resendApiKey.trim()}`,
               'Content-Type': 'application/json'
-            }
+            },
+            timeout: 10000
           }
         );
         messageId = res.data.id;
       } else if (settings.emailService === 'sendgrid') {
+        const sendgridKey = settings.apiKey || process.env.SENDGRID_API_KEY;
+        if (!sendgridKey) throw new Error('SendGrid API Key is required. Please add it in Settings.');
         const res = await axios.post(
           'https://api.sendgrid.com/v3/mail/send',
           {
@@ -215,9 +214,10 @@ class EmailService {
           },
           {
             headers: {
-              Authorization: `Bearer ${settings.apiKey}`,
+              Authorization: `Bearer ${sendgridKey.trim()}`,
               'Content-Type': 'application/json'
-            }
+            },
+            timeout: 10000
           }
         );
         messageId = 'sendgrid_' + Date.now();
@@ -249,7 +249,12 @@ class EmailService {
 
       return { success: true, logEntry };
     } catch (error) {
-      console.error(`Failed to send email to ${to}:`, error.message);
+      const isTimeout = error.code === 'ETIMEDOUT' || error.message.includes('timeout') || error.message.includes('Connection timeout');
+      const friendlyErrMsg = isTimeout
+        ? 'Render Free Tier blocks raw SMTP ports 465 & 587. Please switch to Resend API in Settings for instant delivery, or upgrade Render instance to Starter ($7/mo) to unblock ports.'
+        : error.message;
+
+      console.error(`Failed to send email to ${to}:`, friendlyErrMsg);
       db.addLog({
         checkoutId: checkoutId || null,
         customerEmail: to,
@@ -259,9 +264,9 @@ class EmailService {
         subject,
         status: 'failed',
         mode,
-        error: error.message
+        error: friendlyErrMsg
       });
-      throw error;
+      throw new Error(friendlyErrMsg);
     }
   }
 
