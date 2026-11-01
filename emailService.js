@@ -56,9 +56,17 @@ class EmailService {
     }
 
     // Default SMTP verification
-    const transporter = this.getTransporter();
-    await transporter.verify();
-    return { success: true, message: 'SMTP connection established successfully' };
+    try {
+      const transporter = this.getTransporter();
+      await transporter.verify();
+      return { success: true, message: 'SMTP connection established successfully' };
+    } catch (err) {
+      const isTimeout = err.code === 'ETIMEDOUT' || err.message.includes('timeout') || err.message.includes('Connection timeout');
+      if (isTimeout) {
+        throw new Error('Render Free Tier blocks raw SMTP ports 465 & 587. Please switch to Resend API in Settings for instant sub-second delivery, or upgrade Render service to Starter ($7/mo) to unblock ports.');
+      }
+      throw err;
+    }
   }
 
   getTemplateHtml(templateId) {
