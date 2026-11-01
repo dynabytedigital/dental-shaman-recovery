@@ -265,10 +265,14 @@ class EmailService {
 
       return { success: true, logEntry };
     } catch (error) {
-      const isTimeout = error.code === 'ETIMEDOUT' || error.message.includes('timeout') || error.message.includes('Connection timeout');
-      const friendlyErrMsg = isTimeout
-        ? 'Render Free Tier blocks raw SMTP ports 465 & 587. Please switch to Resend API in Settings for instant delivery, or upgrade Render instance to Starter ($7/mo) to unblock ports.'
-        : error.message;
+      const resendErr = error.response?.data?.message;
+      let friendlyErrMsg = resendErr || error.message;
+
+      if (friendlyErrMsg.includes('not verified') || friendlyErrMsg.includes('resend.com/domains')) {
+        friendlyErrMsg = 'The domain thedentalshaman.com is not verified yet in your Resend account. Please go to resend.com/domains, click "Add Domain" (thedentalshaman.com), and verify your DNS records.';
+      } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout') || error.message.includes('Connection timeout')) {
+        friendlyErrMsg = 'Render Free Tier blocks raw SMTP ports 465 & 587. Please switch to Resend API in Settings for instant sub-second delivery, or upgrade Render service to Starter ($7/mo) to unblock ports.';
+      }
 
       console.error(`Failed to send email to ${to}:`, friendlyErrMsg);
       db.addLog({
