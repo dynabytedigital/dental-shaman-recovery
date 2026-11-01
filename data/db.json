@@ -146,21 +146,7 @@
       }
     ]
   },
-  "emailLogs": [
-    {
-      "id": "log_1793443559106_jhiyf",
-      "sentAt": "2026-10-31T10:45:59.106Z",
-      "checkoutId": "test_checkout_1793443557507",
-      "customerEmail": "nasratulnayem01@gmail.com",
-      "customerName": "Test Recipient",
-      "templateId": 1,
-      "templateName": "Stage 1: Cart Saved Check-in",
-      "subject": "[Test Stage 1] Did something go wrong with your order, Dr. Marc?",
-      "status": "sent",
-      "mode": "manual",
-      "messageId": "<986514a0-bd55-5850-14af-09d2f0bfc63e@thedentalshaman.com>"
-    }
-  ],
+  "emailLogs": [],
   "customerSequences": {},
   "suppressions": []
 }

@@ -462,6 +462,10 @@ async function startCustomerSequence(checkoutId, btnEl) {
   const checkout = currentCheckouts.find(c => String(c.id) === String(checkoutId));
   if (!checkout) return;
 
+  if (!confirm(`Start the 5-stage recovery sequence for ${checkout.fullName} (${checkout.email})?\n\nStage 1 will be sent immediately, and Stages 2–5 will follow your scheduled timing.`)) {
+    return;
+  }
+
   if (btnEl) {
     btnEl.disabled = true;
     btnEl.innerText = 'Starting...';

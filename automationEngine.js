@@ -91,7 +91,6 @@ class AutomationEngine {
       throw new Error('Customer does not have an email address.');
     }
 
-    const seq = db.startCustomerSequence(checkout.id, checkout.email);
     const settings = db.getSettings();
     const sortedStages = [...(settings.templatesConfig || [])]
       .filter(t => t.enabled)
@@ -113,6 +112,8 @@ class AutomationEngine {
         customerName: checkout.fullName
       });
     }
+
+    const seq = db.startCustomerSequence(checkout.id, checkout.email);
 
     return {
       sequence: seq,
