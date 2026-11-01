@@ -17,7 +17,7 @@ const DEFAULT_DB = {
     senderName: process.env.DEFAULT_FROM_NAME || 'Dr. Marc Mortiboys | The Dental Shaman',
     senderEmail: process.env.DEFAULT_FROM_EMAIL || 'shop@thedentalshaman.com',
     replyTo: process.env.DEFAULT_REPLY_TO || 'shop@thedentalshaman.com',
-    emailService: 'smtp',
+    emailService: process.env.RESEND_API_KEY ? 'resend' : 'smtp',
     smtp: {
       host: 'smtp.hostinger.com',
       port: 465,
@@ -25,7 +25,7 @@ const DEFAULT_DB = {
       user: 'shop@thedentalshaman.com',
       pass: 'mh1i-liei-n0u1-qa37'
     },
-    apiKey: '',
+    apiKey: process.env.RESEND_API_KEY || '',
     templatesConfig: [
       {
         id: 1,
@@ -247,6 +247,10 @@ class Database {
   }
 
   getSettings() {
+    if (process.env.RESEND_API_KEY && (!this.data.settings.apiKey || this.data.settings.emailService === 'smtp')) {
+      this.data.settings.emailService = 'resend';
+      this.data.settings.apiKey = process.env.RESEND_API_KEY;
+    }
     return this.data.settings;
   }
 
