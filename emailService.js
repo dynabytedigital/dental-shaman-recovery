@@ -40,11 +40,19 @@ class EmailService {
     const settings = db.getSettings();
 
     if (settings.emailService === 'resend') {
-      if (!settings.apiKey) throw new Error('Resend API Key is required');
-      const res = await axios.get('https://api.resend.com/api-keys', {
-        headers: { Authorization: `Bearer ${settings.apiKey}` }
-      });
-      return { success: true, message: 'Resend API authenticated successfully' };
+      const apiKey = settings.apiKey || process.env.RESEND_API_KEY;
+      if (!apiKey) throw new Error('Resend API Key is required');
+      try {
+        await axios.get('https://api.resend.com/api-keys', {
+          headers: { Authorization: `Bearer ${apiKey.trim()}` }
+        });
+        return { success: true, message: 'Resend API authenticated successfully' };
+      } catch (err) {
+        if (err.response?.data?.message?.includes('only send emails')) {
+          return { success: true, message: 'Resend Sending API key authenticated and ready for dispatch.' };
+        }
+        throw new Error(err.response?.data?.message || err.message);
+      }
     }
 
     if (settings.emailService === 'sendgrid') {
