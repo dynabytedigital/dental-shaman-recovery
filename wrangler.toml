@@ -1,0 +1,25 @@
+name = "dental-shaman-recovery"
+main = "src/index.js"
+compatibility_date = "2024-04-01"
+compatibility_flags = ["nodejs_compat"]
+
+[triggers]
+crons = ["*/15 * * * *"]
+
+[[d1_databases]]
+binding = "DB"
+database_name = "dental-shaman-db"
+database_id = "3b28c071-a04a-491c-a67f-3397cc3e2bdb"
+
+[vars]
+SHOPIFY_MYSHOPIFY_DOMAIN = "myjrue-ku.myshopify.com"
+SHOPIFY_SHOP = "shop.thedentalshaman.com"
+# SHOPIFY_ADMIN_ACCESS_TOKEN injected via secret or base64 fallback
+DEFAULT_FROM_NAME = "Dr. Marc Mortiboys | The Dental Shaman"
+DEFAULT_FROM_EMAIL = "shop@thedentalshaman.com"
+DEFAULT_REPLY_TO = "shop@thedentalshaman.com"
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "465"
+SMTP_USER = "shop@thedentalshaman.com"
+SMTP_PASS = "fyrteoildyxulyeh"
+MASTER_ACCESS_CODE = "SHAMAN-PRO-9842"

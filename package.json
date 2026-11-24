@@ -1,0 +1,14 @@
+{
+  "name": "dental-shaman-recovery",
+  "version": "1.0.0",
+  "description": "Permanently Free Google Workspace Recovery & Retention Engine for The Dental Shaman on Cloudflare Workers",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev"
+  },
+  "keywords": ["cloudflare-worker", "shopify", "retention", "abandoned-cart"],
+  "author": "The Dental Shaman",
+  "license": "ISC"
+}
